@@ -14,21 +14,20 @@ class ImportService {
   ImportService(this.ref);
 
   Future<void> importFiles() async {
-    final result = await FilePicker.platform.pickFiles(
-      allowMultiple: true,
+    final files = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['epub', 'cbz', 'cbr', 'docx'],
     );
 
-    if (result != null && result.files.isNotEmpty) {
-      for (final file in result.files) {
+    if (files.isNotEmpty) {
+      for (final file in files) {
         if (file.path != null) {
           try {
             final document = await MetadataExtractor.extractMetadata(file.path!);
             final libraryNotifier = ref.read(libraryProvider.notifier);
             await libraryNotifier.addDocument(document);
           } catch (e) {
-            debugPrint('Failed to import \${file.path}: \$e');
+            debugPrint('Failed to import ${file.path}: $e');
           }
         }
       }
