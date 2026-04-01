@@ -48,4 +48,25 @@ class LibraryNotifier extends AsyncNotifier<List<Document>> {
       return _fetchDocuments();
     });
   }
+
+  Future<void> updateProgress(String id, double progress) async {
+    final repository = await ref.read(documentRepositoryProvider.future);
+    await repository.updateProgress(id, progress);
+    
+    state = state.whenData((documents) {
+      return documents.map((doc) {
+        if (doc.id == id) {
+          return Document(
+            id: doc.id,
+            title: doc.title,
+            filePath: doc.filePath,
+            type: doc.type,
+            coverPath: doc.coverPath,
+            progress: progress,
+          );
+        }
+        return doc;
+      }).toList();
+    });
+  }
 }

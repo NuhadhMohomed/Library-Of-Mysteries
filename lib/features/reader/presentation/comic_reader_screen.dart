@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path_provider/path_provider.dart';
 import '../../library/domain/document.dart';
+import '../../library/application/library_provider.dart';
 import '../data/comic_extractor.dart';
 
 class ComicReaderScreen extends ConsumerStatefulWidget {
@@ -98,6 +99,10 @@ class _ComicReaderScreenState extends ConsumerState<ComicReaderScreen> {
             _preloadPage(index);
             _preloadPage(index + 1);
             _preloadPage(index + 2);
+            
+            final total = _extractor!.pageCount;
+            final progress = total <= 1 ? 1.0 : index / (total - 1);
+            ref.read(libraryProvider.notifier).updateProgress(widget.document.id, progress);
           },
           itemBuilder: (context, index) {
             final pagePath = _pageCache[index];
@@ -106,12 +111,35 @@ class _ComicReaderScreenState extends ConsumerState<ComicReaderScreen> {
               return const Center(child: CircularProgressIndicator());
             }
             
-            return InteractiveViewer(
-              minScale: 1.0,
-              maxScale: 4.0,
-              child: Image.file(
-                File(pagePath),
-                fit: BoxFit.contain,
+            return AnimatedBuilder(
+              animation: _pageController,
+              builder: (context, child) {
+                double value = 0.0;
+                if (_pageController.position.haveDimensions) {
+                  value = _pageController.page! - index;
+                }
+                
+                final isLeaving = value > 0;
+                final normalizedValue = value.abs().clamp(0.0, 1.0);
+                
+                // 3D Page Flip Effect
+                final transform = Matrix4.identity()
+                  ..setEntry(3, 2, 0.002) // Perspective
+                  ..rotateY(isLeaving ? -normalizedValue * 1.5 : normalizedValue * 1.5);
+
+                return Transform(
+                  transform: transform,
+                  alignment: isLeaving ? Alignment.centerRight : Alignment.centerLeft,
+                  child: child,
+                );
+              },
+              child: InteractiveViewer(
+                minScale: 1.0,
+                maxScale: 4.0,
+                child: Image.file(
+                  File(pagePath),
+                  fit: BoxFit.contain,
+                ),
               ),
             );
           },
