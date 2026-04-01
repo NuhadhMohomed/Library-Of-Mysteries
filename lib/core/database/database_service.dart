@@ -37,7 +37,8 @@ class DatabaseService {
         id TEXT PRIMARY KEY,
         title TEXT NOT NULL,
         filePath TEXT NOT NULL,
-        type TEXT NOT NULL
+        type TEXT NOT NULL,
+        coverPath TEXT
       )
     ''');
     
