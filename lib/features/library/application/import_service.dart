@@ -1,6 +1,7 @@
+import 'package:flutter/foundation.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'metadata_extractor.dart';
+import '../data/metadata_extractor.dart';
 import 'package:library_of_mysteries/features/library/application/library_provider.dart';
 
 final importServiceProvider = Provider<ImportService>((ref) {
@@ -8,7 +9,7 @@ final importServiceProvider = Provider<ImportService>((ref) {
 });
 
 class ImportService {
-  final ProviderRef ref;
+  final Ref ref;
 
   ImportService(this.ref);
 
@@ -27,7 +28,7 @@ class ImportService {
             final libraryNotifier = ref.read(libraryProvider.notifier);
             await libraryNotifier.addDocument(document);
           } catch (e) {
-            print('Failed to import \${file.path}: \$e');
+            debugPrint('Failed to import \${file.path}: \$e');
           }
         }
       }
