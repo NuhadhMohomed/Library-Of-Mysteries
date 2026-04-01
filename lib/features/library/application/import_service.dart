@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:path_provider/path_provider.dart';
 import '../data/metadata_extractor.dart';
 import 'package:library_of_mysteries/features/library/application/library_provider.dart';
 
@@ -20,10 +21,11 @@ class ImportService {
     );
 
     if (files.isNotEmpty) {
+      final appDir = await getApplicationDocumentsDirectory();
       for (final file in files) {
         if (file.path != null) {
           try {
-            final document = await MetadataExtractor.extractMetadata(file.path!);
+            final document = await MetadataExtractor.extractMetadata(file.path!, appDir.path);
             final libraryNotifier = ref.read(libraryProvider.notifier);
             await libraryNotifier.addDocument(document);
           } catch (e) {

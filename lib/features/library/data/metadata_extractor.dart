@@ -13,8 +13,12 @@ class ExtractionResult {
 }
 
 class MetadataExtractor {
-  static Future<Document> extractMetadata(String filePath) async {
-    final result = await compute(_extractWorker, filePath);
+  static Future<Document> extractMetadata(String filePath, String persistentDir) async {
+    final result = await compute(_extractWorker, {
+      'filePath': filePath,
+      'persistentDir': persistentDir,
+    });
+    
     final ext = p.extension(filePath).toLowerCase();
     String type = 'UNKNOWN';
     if (ext == '.epub') type = 'EPUB';
@@ -29,21 +33,23 @@ class MetadataExtractor {
     );
   }
 
-  static ExtractionResult _extractWorker(String filePath) {
+  static ExtractionResult _extractWorker(Map<String, String> args) {
+    final filePath = args['filePath']!;
+    final persistentDir = args['persistentDir']!;
     final ext = p.extension(filePath).toLowerCase();
     
     if (ext == '.epub') {
-      return _extractEpub(filePath);
+      return _extractEpub(filePath, persistentDir);
     } else if (ext == '.cbz') {
-      return _extractCbz(filePath);
+      return _extractCbz(filePath, persistentDir);
     }
     
     return ExtractionResult(p.basename(filePath), null);
   }
 
-  static ExtractionResult _extractEpub(String filePath) {
-    final bytes = File(filePath).readAsBytesSync();
-    final archive = ZipDecoder().decodeBytes(bytes);
+  static ExtractionResult _extractEpub(String filePath, String persistentDir) {
+    final inputStream = InputFileStream(filePath);
+    final archive = ZipDecoder().decodeBuffer(inputStream);
     
     String title = p.basenameWithoutExtension(filePath);
     String? coverPath;
@@ -53,9 +59,9 @@ class MetadataExtractor {
         final name = file.name.toLowerCase();
         if ((name.contains('cover') || name.contains('thumbnail')) && 
             (name.endsWith('.jpg') || name.endsWith('.jpeg') || name.endsWith('.png'))) {
-          final tempDir = Directory.systemTemp.createTempSync('lib_covers');
-          final coverFile = File(p.join(tempDir.path, p.basename(file.name)));
-          coverFile.writeAsBytesSync(file.content as List<int>);
+          final coverFile = File(p.join(persistentDir, 'cover_${DateTime.now().millisecondsSinceEpoch}_${p.basename(file.name)}'));
+          final content = file.content as List<int>;
+          coverFile.writeAsBytesSync(content);
           coverPath = coverFile.path;
         }
         
@@ -68,13 +74,13 @@ class MetadataExtractor {
         }
       }
     }
-    
+    inputStream.close();
     return ExtractionResult(title, coverPath);
   }
 
-  static ExtractionResult _extractCbz(String filePath) {
-    final bytes = File(filePath).readAsBytesSync();
-    final archive = ZipDecoder().decodeBytes(bytes);
+  static ExtractionResult _extractCbz(String filePath, String persistentDir) {
+    final inputStream = InputFileStream(filePath);
+    final archive = ZipDecoder().decodeBuffer(inputStream);
     
     String title = p.basenameWithoutExtension(filePath);
     String? coverPath;
@@ -87,12 +93,14 @@ class MetadataExtractor {
     images.sort((a, b) => a.name.compareTo(b.name));
     
     if (images.isNotEmpty) {
-      final tempDir = Directory.systemTemp.createTempSync('lib_covers');
-      final coverFile = File(p.join(tempDir.path, p.basename(images.first.name)));
-      coverFile.writeAsBytesSync(images.first.content as List<int>);
+      final firstImage = images.first;
+      final coverFile = File(p.join(persistentDir, 'cover_${DateTime.now().millisecondsSinceEpoch}_${p.basename(firstImage.name)}'));
+      final content = firstImage.content as List<int>;
+      coverFile.writeAsBytesSync(content);
       coverPath = coverFile.path;
     }
     
+    inputStream.close();
     return ExtractionResult(title, coverPath);
   }
 }

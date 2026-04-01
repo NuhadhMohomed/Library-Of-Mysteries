@@ -36,20 +36,10 @@ class DatabaseService {
       CREATE TABLE documents (
         id TEXT PRIMARY KEY,
         title TEXT NOT NULL,
-        filePath TEXT NOT NULL,
+        file_path TEXT NOT NULL,
         type TEXT NOT NULL,
-        coverPath TEXT,
+        cover_path TEXT,
         progress REAL DEFAULT 0.0
-      )
-    ''');
-    
-    await db.execute('''
-      CREATE TABLE highlights (
-        id TEXT PRIMARY KEY,
-        documentId TEXT NOT NULL,
-        text TEXT NOT NULL,
-        cfi TEXT NOT NULL,
-        FOREIGN KEY (documentId) REFERENCES documents (id) ON DELETE CASCADE
       )
     ''');
   }

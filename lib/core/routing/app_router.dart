@@ -7,19 +7,7 @@ import '../../features/reader/presentation/book_reader_screen.dart';
 import '../../features/reader/presentation/comic_reader_screen.dart';
 import '../../features/library/domain/document.dart';
 
-// Placeholder screens for now
-class PlaceholderScreen extends StatelessWidget {
-  final String title;
-  const PlaceholderScreen({super.key, required this.title});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(title)),
-      body: Center(child: Text(title)),
-    );
-  }
-}
+// Removed PlaceholderScreen as part of ponytail audit YAGNI cleanup.
 
 final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
@@ -41,12 +29,12 @@ final routerProvider = Provider<GoRouter>((ref) {
               return ComicReaderScreen(document: doc);
             }
           }
-          return PlaceholderScreen(title: 'Reader: $id');
+          return Scaffold(appBar: AppBar(title: Text('Reader: $id')));
         },
       ),
       GoRoute(
         path: '/settings',
-        builder: (context, state) => const PlaceholderScreen(title: 'Settings'),
+        builder: (context, state) => Scaffold(appBar: AppBar(title: const Text('Settings'))),
       ),
     ],
   );
