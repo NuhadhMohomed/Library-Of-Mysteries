@@ -31,7 +31,10 @@ class DocumentRepository {
   Future<void> updateProgress(String id, double progress) async {
     await db.update(
       'documents',
-      {'progress': progress},
+      {
+        'progress': progress,
+        'last_read': DateTime.now().millisecondsSinceEpoch,
+      },
       where: 'id = ?',
       whereArgs: [id],
     );

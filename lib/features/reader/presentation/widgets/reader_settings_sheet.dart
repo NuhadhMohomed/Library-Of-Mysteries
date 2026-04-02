@@ -53,6 +53,22 @@ class ReaderSettingsSheet extends ConsumerWidget {
                   .updateSettings(settings.copyWith(margin: val));
             },
           ),
+          const SizedBox(height: 16),
+          Text('Theme', style: Theme.of(context).textTheme.titleSmall),
+          const SizedBox(height: 8),
+          SegmentedButton<ReaderTheme>(
+            segments: const [
+              ButtonSegment(value: ReaderTheme.light, label: Text('Light')),
+              ButtonSegment(value: ReaderTheme.sepia, label: Text('Sepia')),
+              ButtonSegment(value: ReaderTheme.dark, label: Text('Dark')),
+              ButtonSegment(value: ReaderTheme.amoled, label: Text('AMOLED')),
+            ],
+            selected: {settings.theme},
+            onSelectionChanged: (Set<ReaderTheme> newSelection) {
+              ref.read(readerSettingsProvider.notifier)
+                  .updateSettings(settings.copyWith(theme: newSelection.first));
+            },
+          ),
         ],
       ),
     );

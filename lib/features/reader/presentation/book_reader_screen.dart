@@ -43,7 +43,26 @@ class _BookReaderScreenState extends ConsumerState<BookReaderScreen> {
   Widget build(BuildContext context) {
     final settings = ref.watch(readerSettingsProvider);
 
+    Color getBackgroundColor() {
+      switch (settings.theme) {
+        case ReaderTheme.light: return Colors.white;
+        case ReaderTheme.sepia: return const Color(0xFFF4ECD8);
+        case ReaderTheme.dark: return Colors.grey.shade900;
+        case ReaderTheme.amoled: return Colors.black;
+      }
+    }
+
+    Color getTextColor() {
+      switch (settings.theme) {
+        case ReaderTheme.light: return Colors.black87;
+        case ReaderTheme.sepia: return const Color(0xFF5B4636);
+        case ReaderTheme.dark: return Colors.grey.shade300;
+        case ReaderTheme.amoled: return Colors.grey.shade400;
+      }
+    }
+
     return Scaffold(
+      backgroundColor: getBackgroundColor(),
       appBar: AppBar(
         title: Text(
           widget.document.title,
@@ -54,8 +73,11 @@ class _BookReaderScreenState extends ConsumerState<BookReaderScreen> {
           IconButton(
             icon: const Icon(Icons.settings),
             onPressed: _showSettings,
+            color: getTextColor(),
           ),
         ],
+        backgroundColor: getBackgroundColor(),
+        foregroundColor: getTextColor(),
       ),
       body: Padding(
         padding: EdgeInsets.symmetric(horizontal: settings.margin),
@@ -66,6 +88,7 @@ class _BookReaderScreenState extends ConsumerState<BookReaderScreen> {
               textStyle: TextStyle(
                 fontSize: settings.fontSize,
                 height: settings.lineSpacing,
+                color: getTextColor(),
               ),
             ),
             chapterDividerBuilder: (_) => const Divider(),

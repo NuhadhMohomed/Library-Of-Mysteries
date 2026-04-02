@@ -7,9 +7,10 @@ import '../domain/document.dart';
 
 class ExtractionResult {
   final String title;
+  final String? author;
   final String? coverPath;
 
-  ExtractionResult(this.title, this.coverPath);
+  ExtractionResult(this.title, this.author, this.coverPath);
 }
 
 class MetadataExtractor {
@@ -23,10 +24,12 @@ class MetadataExtractor {
     String type = 'UNKNOWN';
     if (ext == '.epub') type = 'EPUB';
     if (ext == '.cbz' || ext == '.cbr') type = 'COMIC';
+    if (ext == '.docx') type = 'DOCX';
     
     return Document(
       id: const Uuid().v4(),
       title: result.title,
+      author: result.author,
       filePath: filePath,
       type: type,
       coverPath: result.coverPath,
@@ -44,7 +47,7 @@ class MetadataExtractor {
       return _extractCbz(filePath, persistentDir);
     }
     
-    return ExtractionResult(p.basename(filePath), null);
+    return ExtractionResult(p.basename(filePath), null, null);
   }
 
   static ExtractionResult _extractEpub(String filePath, String persistentDir) {
@@ -52,6 +55,7 @@ class MetadataExtractor {
     final archive = ZipDecoder().decodeBuffer(inputStream);
     
     String title = p.basenameWithoutExtension(filePath);
+    String? author;
     String? coverPath;
 
     for (final file in archive) {
@@ -71,11 +75,15 @@ class MetadataExtractor {
           if (titleMatch != null) {
             title = titleMatch.group(1) ?? title;
           }
+          final authorMatch = RegExp(r'<dc:creator[^>]*>([^<]+)</dc:creator>').firstMatch(content);
+          if (authorMatch != null) {
+            author = authorMatch.group(1);
+          }
         }
       }
     }
     inputStream.close();
-    return ExtractionResult(title, coverPath);
+    return ExtractionResult(title, author, coverPath);
   }
 
   static ExtractionResult _extractCbz(String filePath, String persistentDir) {
@@ -101,6 +109,6 @@ class MetadataExtractor {
     }
     
     inputStream.close();
-    return ExtractionResult(title, coverPath);
+    return ExtractionResult(title, null, coverPath);
   }
 }
