@@ -1,0 +1,36 @@
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'metadata_extractor.dart';
+import 'package:library_of_mysteries/features/library/application/library_provider.dart';
+
+final importServiceProvider = Provider<ImportService>((ref) {
+  return ImportService(ref);
+});
+
+class ImportService {
+  final ProviderRef ref;
+
+  ImportService(this.ref);
+
+  Future<void> importFiles() async {
+    final result = await FilePicker.platform.pickFiles(
+      allowMultiple: true,
+      type: FileType.custom,
+      allowedExtensions: ['epub', 'cbz', 'cbr', 'docx'],
+    );
+
+    if (result != null && result.files.isNotEmpty) {
+      for (final file in result.files) {
+        if (file.path != null) {
+          try {
+            final document = await MetadataExtractor.extractMetadata(file.path!);
+            final libraryNotifier = ref.read(libraryProvider.notifier);
+            await libraryNotifier.addDocument(document);
+          } catch (e) {
+            print('Failed to import \${file.path}: \$e');
+          }
+        }
+      }
+    }
+  }
+}
