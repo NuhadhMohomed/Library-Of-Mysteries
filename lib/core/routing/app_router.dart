@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../features/library/presentation/library_screen.dart';
+import '../../features/reader/presentation/book_reader_screen.dart';
+import '../../features/library/domain/document.dart';
+
 // Placeholder screens for now
 class PlaceholderScreen extends StatelessWidget {
   final String title;
@@ -22,13 +26,17 @@ final routerProvider = Provider<GoRouter>((ref) {
     routes: [
       GoRoute(
         path: '/',
-        builder: (context, state) => const PlaceholderScreen(title: 'Library'),
+        builder: (context, state) => const LibraryScreen(),
       ),
       GoRoute(
         path: '/reader/:id',
         builder: (context, state) {
-          final id = state.pathParameters['id'];
-          return PlaceholderScreen(title: 'Reader: $id');
+          final String id = state.pathParameters['id'] ?? '';
+          final doc = state.extra as Document?;
+          if (doc != null && doc.type == 'EPUB') {
+            return BookReaderScreen(document: doc);
+          }
+          return PlaceholderScreen(title: 'Reader: \${id}');
         },
       ),
       GoRoute(
