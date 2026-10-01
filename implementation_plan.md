@@ -90,6 +90,13 @@ We will use a relational schema via `sqflite` to ensure fast queries and data in
 - **Background Tasks (Isolates)**: When scanning folders or parsing metadata, use Flutter Isolates (via `compute`) to offload work so the main UI thread remains completely responsive.
 - **Comic Memory Management**: Use **Windowed Extraction & Lazy Rendering** to avoid Out of Memory (OOM) crashes. Extract only a few pages at a time into a cache directory and load them as the user scrolls, rather than extracting the entire archive into memory at once.
 
+## 2.6 Typography & Accessibility
+- **Base Typography**: Adhere to strict mobile design rules (16px base body font) with minimum AA contrast for the app shell.
+- **Reader Scaling**: User-controlled font scaling and customization (margins, line spacing) is restricted exclusively to the Reader view to prevent breaking the Library Grid layout.
+
+## 2.7 Testing Strategy (TDD)
+- **Scope**: Test-Driven Development (TDD) will be used strictly for the core logic layer (`data/` parsers, isolate extractors, database queries, and `application/` state management).
+- **UI Tests**: Kept to a minimum for critical paths (e.g., Library Import) to maintain rapid UI iteration speed.
 ---
 
 # Part 3 — Phased Implementation Roadmap
