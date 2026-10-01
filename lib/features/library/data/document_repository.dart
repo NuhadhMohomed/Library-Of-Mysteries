@@ -27,4 +27,13 @@ class DocumentRepository {
       whereArgs: [id],
     );
   }
+
+  Future<void> updateProgress(String id, double progress) async {
+    await db.update(
+      'documents',
+      {'progress': progress},
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
 }

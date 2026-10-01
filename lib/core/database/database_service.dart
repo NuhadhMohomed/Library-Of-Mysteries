@@ -38,7 +38,8 @@ class DatabaseService {
         title TEXT NOT NULL,
         filePath TEXT NOT NULL,
         type TEXT NOT NULL,
-        coverPath TEXT
+        coverPath TEXT,
+        progress REAL DEFAULT 0.0
       )
     ''');
     

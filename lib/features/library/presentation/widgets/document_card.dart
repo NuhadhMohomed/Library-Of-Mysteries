@@ -53,7 +53,7 @@ class DocumentCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   LinearProgressIndicator(
-                    value: 0,
+                    value: document.progress,
                     backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
                     color: Theme.of(context).colorScheme.primary,
                   ),
