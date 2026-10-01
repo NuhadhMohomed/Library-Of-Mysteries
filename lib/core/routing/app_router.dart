@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../features/library/presentation/library_screen.dart';
 import '../../features/reader/presentation/book_reader_screen.dart';
+import '../../features/reader/presentation/comic_reader_screen.dart';
 import '../../features/library/domain/document.dart';
 
 // Placeholder screens for now
@@ -33,10 +34,14 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           final String id = state.pathParameters['id'] ?? '';
           final doc = state.extra as Document?;
-          if (doc != null && doc.type == 'EPUB') {
-            return BookReaderScreen(document: doc);
+          if (doc != null) {
+            if (doc.type == 'EPUB') {
+              return BookReaderScreen(document: doc);
+            } else if (doc.type == 'COMIC') {
+              return ComicReaderScreen(document: doc);
+            }
           }
-          return PlaceholderScreen(title: 'Reader: \${id}');
+          return PlaceholderScreen(title: 'Reader: $id');
         },
       ),
       GoRoute(
