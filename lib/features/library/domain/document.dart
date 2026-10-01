@@ -19,9 +19,9 @@ class Document {
     return {
       'id': id,
       'title': title,
-      'filePath': filePath,
+      'file_path': filePath,
       'type': type,
-      'coverPath': coverPath,
+      'cover_path': coverPath,
       'progress': progress,
     };
   }
@@ -30,9 +30,9 @@ class Document {
     return Document(
       id: map['id'] as String,
       title: map['title'] as String,
-      filePath: map['filePath'] as String,
+      filePath: map['file_path'] as String,
       type: map['type'] as String,
-      coverPath: map['coverPath'] as String?,
+      coverPath: map['cover_path'] as String?,
       progress: (map['progress'] as num?)?.toDouble() ?? 0.0,
     );
   }
