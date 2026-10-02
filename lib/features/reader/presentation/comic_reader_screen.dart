@@ -29,21 +29,32 @@ class _ComicReaderScreenState extends ConsumerState<ComicReaderScreen> {
   }
 
   Future<void> _initExtractor() async {
-    final tempDir = await getTemporaryDirectory();
-    final comicDir = Directory('${tempDir.path}/${widget.document.id}');
-    if (!await comicDir.exists()) {
-      await comicDir.create(recursive: true);
-    }
-    
-    _extractor = ComicExtractor(widget.document.filePath, comicDir.path);
-    await _extractor!.init();
-    
-    if (mounted) {
-      setState(() {
-        _isLoading = false;
-      });
-      _preloadPage(0);
-      _preloadPage(1);
+    try {
+      final tempDir = await getTemporaryDirectory();
+      final comicDir = Directory('${tempDir.path}/${widget.document.id}');
+      if (!await comicDir.exists()) {
+        await comicDir.create(recursive: true);
+      }
+      
+      _extractor = ComicExtractor(widget.document.filePath, comicDir.path);
+      await _extractor!.init();
+      
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+        _preloadPage(0);
+        _preloadPage(1);
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to load comic: $e')),
+        );
+      }
     }
   }
 
@@ -51,11 +62,15 @@ class _ComicReaderScreenState extends ConsumerState<ComicReaderScreen> {
     if (_extractor == null || index < 0 || index >= _extractor!.pageCount) return;
     if (_pageCache.containsKey(index)) return;
     
-    final path = await _extractor!.getPage(index);
-    if (mounted) {
-      setState(() {
-        _pageCache[index] = path;
-      });
+    try {
+      final path = await _extractor!.getPage(index);
+      if (mounted) {
+        setState(() {
+          _pageCache[index] = path;
+        });
+      }
+    } catch (e) {
+      debugPrint('Failed to load page $index: $e');
     }
   }
 
@@ -63,6 +78,15 @@ class _ComicReaderScreenState extends ConsumerState<ComicReaderScreen> {
   void dispose() {
     _extractor?.dispose();
     _pageController.dispose();
+    
+    // Clean up temporary extracted pages
+    getTemporaryDirectory().then((tempDir) {
+      final comicDir = Directory('${tempDir.path}/${widget.document.id}');
+      if (comicDir.existsSync()) {
+        comicDir.deleteSync(recursive: true);
+      }
+    }).catchError((_) {});
+    
     super.dispose();
   }
 
