@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:library_of_mysteries/features/library/domain/document.dart';
 import 'package:library_of_mysteries/core/database/database_service.dart';
@@ -19,7 +18,6 @@ void main() {
     databaseService = DatabaseService(inMemory: true);
     db = await databaseService.database;
     repository = DocumentRepository(db);
-    print(await db.rawQuery('PRAGMA foreign_keys'));
   });
 
   tearDown(() async {

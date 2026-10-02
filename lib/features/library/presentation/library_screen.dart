@@ -13,34 +13,51 @@ class LibraryScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final libraryState = ref.watch(libraryProvider);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Library of Mysteries'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () => context.push('/settings'),
-            tooltip: 'Settings',
-          )
-        ],
-      ),
-      body: libraryState.when(
-        data: (documents) {
-          if (documents.isEmpty) {
-            return _buildEmptyState(context);
-          }
-          return _buildGrid(context, documents);
-        },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(child: Text('Error: $error')),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () async {
-          final importService = ref.read(importServiceProvider);
-          await importService.importFiles();
-        },
-        icon: const Icon(Icons.document_scanner),
-        label: const Text('Scan Device'),
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Library of Mysteries'),
+          bottom: const TabBar(
+            tabs: [
+              Tab(text: 'Books'),
+              Tab(text: 'Comics'),
+            ],
+          ),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.settings),
+              onPressed: () => context.push('/settings'),
+              tooltip: 'Settings',
+            )
+          ],
+        ),
+        body: libraryState.when(
+          data: (documents) {
+            if (documents.isEmpty) {
+              return _buildEmptyState(context);
+            }
+            final books = documents.where((d) => d.type == 'EPUB' || d.type == 'DOCX').toList();
+            final comics = documents.where((d) => d.type == 'COMIC').toList();
+
+            return TabBarView(
+              children: [
+                _buildGrid(context, books),
+                _buildGrid(context, comics),
+              ],
+            );
+          },
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, stack) => Center(child: Text('Error: $error')),
+        ),
+        floatingActionButton: FloatingActionButton.extended(
+          onPressed: () async {
+            final importService = ref.read(importServiceProvider);
+            await importService.importFiles();
+          },
+          icon: const Icon(Icons.document_scanner),
+          label: const Text('Scan Device'),
+        ),
       ),
     );
   }

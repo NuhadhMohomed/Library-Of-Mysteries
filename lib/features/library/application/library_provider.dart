@@ -59,10 +59,12 @@ class LibraryNotifier extends AsyncNotifier<List<Document>> {
           return Document(
             id: doc.id,
             title: doc.title,
+            author: doc.author,
             filePath: doc.filePath,
             type: doc.type,
             coverPath: doc.coverPath,
             progress: progress,
+            lastRead: DateTime.now().millisecondsSinceEpoch,
           );
         }
         return doc;
